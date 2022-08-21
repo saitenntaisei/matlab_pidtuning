@@ -24,23 +24,25 @@ taxis_imu=double(t_imu.MessageList.Time)./10^9;
 taxis_cmd=double(t_cmd.MessageList.Time)./10^9;
 
 velLinearX = cumtrapz(double(taxis_imu),imuLinearX);
-
+[velLinearX,taxis_imu] = resample(velLinearX, taxis_imu,10);
+[cmdLinearX,taxis_cmd]= resample(cmdLinearX,taxis_cmd,10);
 figure;
-%[a,b] = resample(timetable(velLinearX), taxis_imu,10);
-plot([1:size(taxis_imu)],velLinearX);
+
+plot(1:size(taxis_imu),velLinearX);
 hold on;
-plot([1:size(taxis_cmd)],cmdLinearX.*0.08);
+plot(1:size(taxis_cmd),cmdLinearX.*0.08);
 hold off;
-% figure;
+figure;
 dt=0.1;
-%z = iddata(transpose(imuLinearX(385:584).*0.08), transpose(cmdLinearX(1:200)), dt);
-%input_dim = 1; % 入力のチャンネルを指定
-%output_dim  = 1; % 出力のチャンネルを指定
-%GS = spa(z(:,output_dim,input_dim));
-%h = bodeplot(GS);
-%pole_num = 1; % 極の数を指定
-%zero_num = 0; % 零点の数を指定
-%mtf = tfest(z(:,output_dim,input_dim), pole_num, zero_num);
+len =min(size(taxis_imu),size(taxis_cmd));
+z = iddata(transpose(velLinearX(1:len).*0.08), transpose(cmdLinearX(1:len)), dt);
+input_dim = 1; % 入力のチャンネルを指定
+output_dim  = 1; % 出力のチャンネルを指定
+GS = spa(z(:,output_dim,input_dim));
+h = bodeplot(GS);
+pole_num = 1; % 極の数を指定
+zero_num = 0; % 零点の数を指定
+mtf = tfest(z(:,output_dim,input_dim), pole_num, zero_num);
 
 
 
